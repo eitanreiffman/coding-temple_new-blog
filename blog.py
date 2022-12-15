@@ -84,6 +84,59 @@ class Blog:
         else:
             print(f"Post with ID {post_id} does not exist.")
 
+    # Method to edit a post by ID
+    def edit_post(self, post_id):
+        post = self._get_post_from_id(post_id)
+        if post:
+            # Check that the user is logged in AND that the logged in user is the author of the post
+            if self.current_user is not None and self.current_user == post.author:
+                print(post)
+                # Ask user which part of post they'd like to edit
+                edit_part = input("Would you like to edit the title, body, both, or exit? ").lower()
+                # Make sure response is valid
+                while edit_part not in {'title','body','both','exit'}:
+                    edit_part = input("Invalid Option. Title, Body, Both, or Exit")
+                # If the user types exit, exit the function
+                if edit_part == 'exit':
+                    return
+                elif edit_part == 'both':
+                    # Get new title and body
+                    new_title = input("Enter the new title: ")
+                    new_body = input("Enter the new body: ")
+                    # Edit the post with the post.update method
+                    post.update(title=new_title, body=new_body)
+                elif edit_part == 'title':
+                    new_title = input("Enter the new title: ")
+                    post.update(title=new_title)
+                elif edit_part == 'body':
+                    new_body = input("Enter the new body: ")
+                    post.update(body=new_body)
+                print(f"{post.title} has been updated!")
+            # If the user is logged in but NOT the author of the post
+            if self.current_user is not None and self.current_user != post.author:
+                print("You do not have permission to edit this post.") # 403 HTTP Status Code - Client ID known but Forbidden
+            # If the user is not logged in:
+            else:
+                print("You must be logged in to perform this action.") # 401 HTTP Status Code
+        else:
+            print(f"Post with ID {post_id} does not exist.")
+        
+    # Method to delete a post by its ID
+    def delete_post(self, post_id):
+        post = self._get_post_from_id(post_id)
+        if post:
+            # Check that the user is logged in AND that the logged in user is the author of the post
+            if self.current_user is not None and self.current_user == post.author:
+                self.posts.remove(post)
+                print(f"{post.title} has been removed")
+            # If the user is logged in but NOT the author of the post
+            elif self.current_user is not None and self.current_user != post.author:
+                print("You do not have permission to delete this post")
+            else:
+                print("You must be logged in to perform this action.")
+        else:
+            print(f"Post with an ID of {post_id} does not exist")
+
 class User:
     id_counter = 1 # Class attribute keeping track of user IDs
 
@@ -128,6 +181,10 @@ class Post:
     def __repr__(self):
         return f"<Post {self.id}|{self.title}>"
 
+    def update(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
 
 # Define a function to run the blog
 def run_blog():
@@ -171,10 +228,10 @@ def run_blog():
         # If the current user is not "None", AKA a current is already logged in
         else:
             # Print menu options for logged in user
-            print("1. Log Out\n2. Create New Post\n3. View All Posts\n4. View Single Post")
+            print("1. Log Out\n2. Create New Post\n3. View All Posts\n4. View Single Post\n5. Edit a Post\n6. Delete a Post")
             to_do = input("Which option would you like to choose? ")
-            while to_do not in {'1', '2', '3', '4'}:
-                to_do = input("Invalid option. Please choose 1, 2, 3, or 4. ")
+            while to_do not in {'1', '2', '3', '4', '5', '6'}:
+                to_do = input("Invalid option. Please choose 1, 2, 3, 4, 5, or 6. ")
             if to_do == '1':
                 my_blog.log_user_out()
             elif to_do == '2':
@@ -186,6 +243,16 @@ def run_blog():
                 post_id = input("What is the ID of the post you would like to view? ")
                 # Call the view single post method with post_id as an argument
                 my_blog.view_post(post_id)
+            elif to_do == '5':
+                # Get ID of post
+                post_id = input("What is the ID of the post you would like to edit? ")
+                # Call the edit post method with post_id as an argument
+                my_blog.edit_post(post_id)
+            elif to_do == '6':
+                # Get the ID of the post we would like to delete
+                post_id = input("What is the ID of the post you'd like to delete? ")
+                # Call the delete post method with post_id as an argument
+                my_blog.delete_post(post_id)
 
 
 # Execute the function to run the blog
