@@ -4,6 +4,13 @@ class Blog:
         self.posts = []
         self.current_user = None # attribute used to determine if there's a logged in user
 
+    # Private method for getting a post instance from the blog based on its ID
+    # Returns None if post with ID does not exist
+    def _get_post_from_id(self, post_id):
+        for post in self.posts:
+            if post.id == int(post_id):
+                return post
+
     # Method to add new user to the blog
     def create_new_user(self):
         # Get user info from input
@@ -69,6 +76,14 @@ class Blog:
         else:
             print("There are currently no posts for this blog")
 
+    # Method to view single post by ID
+    def view_post(self, post_id):
+        post = self._get_post_from_id(post_id)
+        if post:
+            print(post)
+        else:
+            print(f"Post with ID {post_id} does not exist.")
+
 class User:
     id_counter = 1 # Class attribute keeping track of user IDs
 
@@ -104,7 +119,7 @@ class Post:
 
     def __str__(self):
         formatted_post = f"""
-        {self.id}  -  {self.title.title()}
+        {self.id}. {self.title.title()}
         By: {self.author}
         {self.body}
         """
@@ -118,17 +133,24 @@ class Post:
 def run_blog():
     # Create an instance of the Blog Class
     my_blog = Blog()
+
+    # Add preloaded data for the Blog
+    initial_user = User('eitanr','abc123')
+    my_blog.users.add(initial_user)
+    initial_post = (Post('Pre-Loaded', 'This post was preloaded', initial_user))
+    my_blog.posts.append(initial_post)
+
     # Keep looping while the blog is "running"
     while True:
         # if there is no current user logged in
         if my_blog.current_user is None:
             # Print the menu options
-            print("1. Sign Up\n2. Log In\n3. View All Posts\n5. Quit")
+            print("1. Sign Up\n2. Log In\n3. View All Posts\n4. View Single Post\n5. Quit")
             # Ask the user which option they would like to do
             to_do = input("Which option would you like to do? ")
             # Keep asking if user chooses an invalid option
-            while to_do not in {'1', '5', '2', '3'}:
-                to_do = input("Invalid option. Please choose 1, 2, 3, or 5: ")
+            while to_do not in {'1', '5', '2', '3', '4'}:
+                to_do = input("Invalid option. Please choose 1, 2, 3, 4, or 5: ")
             if to_do == '5':
                 print("Thanks for checking out the blog.")
                 break
@@ -141,19 +163,29 @@ def run_blog():
             elif to_do == '3':
                 # method to view all posts
                 my_blog.view_posts()
+            elif to_do == '4':
+                # Get ID of post
+                post_id = input("What is the ID of the post you would like to view? ")
+                # Call the view single post method with post_id as an argument
+                my_blog.view_post(post_id)
         # If the current user is not "None", AKA a current is already logged in
         else:
             # Print menu options for logged in user
-            print("1. Log Out\n2. Create New Post\n3. View All Posts")
+            print("1. Log Out\n2. Create New Post\n3. View All Posts\n4. View Single Post")
             to_do = input("Which option would you like to choose? ")
-            while to_do not in {'1', '2', '3'}:
-                to_do = input("Invalid option. Please choose 1 or 2. ")
+            while to_do not in {'1', '2', '3', '4'}:
+                to_do = input("Invalid option. Please choose 1, 2, 3, or 4. ")
             if to_do == '1':
                 my_blog.log_user_out()
             elif to_do == '2':
                 my_blog.create_post()
             elif to_do == '3':
                 my_blog.view_posts()
+            elif to_do == '4':
+                # Get ID of post
+                post_id = input("What is the ID of the post you would like to view? ")
+                # Call the view single post method with post_id as an argument
+                my_blog.view_post(post_id)
 
 
 # Execute the function to run the blog
