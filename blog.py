@@ -43,6 +43,32 @@ class Blog:
         self.current_user = None
         print("You have succesfully logged out.")
 
+    # Method to create new post if user is logged in
+    def create_post(self):
+        # Check to make sure user is logged in before creating post
+        if self.current_user is not None:
+           # Get the title and body from user input
+           title = input("Enter the title of your post: ")
+           body = input("Enter the body of your post: ")
+           # Create a new Post instance with the input
+           new_post = Post(title, body, self.current_user)
+           # Add the new post instance to our blog's list of posts
+           self.posts.append(new_post)
+           print(f"{new_post.title} has been created!")
+        else:
+            print("You must be logged in to perform this action.")
+
+    # Method to view ALL posts
+    def view_posts(self):
+        if self.posts:
+            # Loop through all of the posts
+            for post in self.posts:
+                # Display the post
+                print(post)
+        # If no posts:
+        else:
+            print("There are currently no posts for this blog")
+
 class User:
     id_counter = 1 # Class attribute keeping track of user IDs
 
@@ -62,7 +88,31 @@ class User:
         return self.password == password_guess[::-2]
 
 class Post:
-    pass
+    id_counter = 1
+
+    def __init__(self, title, body, author):
+        """
+        title: str
+        body: str
+        author: User
+        """
+        self.title = title
+        self.body = body
+        self.author = author
+        self.id = Post.id_counter
+        Post.id_counter += 1
+
+    def __str__(self):
+        formatted_post = f"""
+        {self.id}  -  {self.title.title()}
+        By: {self.author}
+        {self.body}
+        """
+        return formatted_post
+
+    def __repr__(self):
+        return f"<Post {self.id}|{self.title}>"
+
 
 # Define a function to run the blog
 def run_blog():
@@ -73,12 +123,12 @@ def run_blog():
         # if there is no current user logged in
         if my_blog.current_user is None:
             # Print the menu options
-            print("1. Sign Up\n2. Log In\n5. Quit")
+            print("1. Sign Up\n2. Log In\n3. View All Posts\n5. Quit")
             # Ask the user which option they would like to do
             to_do = input("Which option would you like to do? ")
             # Keep asking if user chooses an invalid option
-            while to_do not in {'1', '5', '2'}:
-                to_do = input("Invalid option. Please choose 1, 2, or 5: ")
+            while to_do not in {'1', '5', '2', '3'}:
+                to_do = input("Invalid option. Please choose 1, 2, 3, or 5: ")
             if to_do == '5':
                 print("Thanks for checking out the blog.")
                 break
@@ -88,15 +138,23 @@ def run_blog():
             elif to_do == '2':
                 # method to log user in
                 my_blog.log_user_in()
+            elif to_do == '3':
+                # method to view all posts
+                my_blog.view_posts()
         # If the current user is not "None", AKA a current is already logged in
         else:
             # Print menu options for logged in user
-            print("1. Log Out")
+            print("1. Log Out\n2. Create New Post\n3. View All Posts")
             to_do = input("Which option would you like to choose? ")
-            while to_do not in {'1'}:
-                to_do = input("Invalid option. Please choose 1. ")
-            if to_do == "1":
+            while to_do not in {'1', '2', '3'}:
+                to_do = input("Invalid option. Please choose 1 or 2. ")
+            if to_do == '1':
                 my_blog.log_user_out()
+            elif to_do == '2':
+                my_blog.create_post()
+            elif to_do == '3':
+                my_blog.view_posts()
+
 
 # Execute the function to run the blog
 run_blog()
